@@ -20,13 +20,15 @@ package org.apache.spark.sql.streaming.examples
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.streaming.StreamSQLContext
 import org.apache.spark.streaming.dstream.ConstantInputDStream
-import org.apache.spark.streaming.{Duration, StreamingContext}
 
 object StreamToStreamJoin {
   case class User(id: Int, name: String)
 
   def main(args: Array[String]): Unit = {
-    val ssc = new StreamingContext("local[10]", "test", Duration(3000))
+    // val ssc = new StreamingContext("local[10]", "test", Duration(3000))
+    // val sc = ssc.sparkContext
+
+    val ssc = SparkConfUtil.createSparkContext(20000, "StreamToStreamJoin")
     val sc = ssc.sparkContext
 
     val streamSqlContext = new StreamSQLContext(ssc, new SQLContext(sc))
@@ -47,3 +49,4 @@ object StreamToStreamJoin {
     ssc.stop()
   }
 }
+
