@@ -26,7 +26,10 @@ object StreamToStreamWindowJoin {
   case class User(id: Int, name: String)
 
   def main(args: Array[String]): Unit = {
-    val ssc = new StreamingContext("local[10]", "test", Duration(3000))
+    //val ssc = new StreamingContext("local[10]", "test", Duration(3000))
+    //val sc = ssc.sparkContext
+
+    val ssc = SparkConfUtil.createSparkContext(3000, "StreamToStreamJoin")
     val sc = ssc.sparkContext
 
     val streamSqlContext = new StreamSQLContext(ssc, new SQLContext(sc))
