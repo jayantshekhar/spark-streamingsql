@@ -10,11 +10,12 @@ import org.apache.spark.streaming.dstream.ConstantInputDStream
  */
 object ECommerceCEP {
 
-  case class Transaction(customerId : Long, city: String, amount: Double)
+  case class Transaction(customerId : Long, city: String, amount: Double, ip: String)
 
-  case class Click(customerId : Long, city: String, productId : Long)
+  case class Click(customerId : Long, city: String, productId : Long, ip: String)
 
-  case class Location(customerId : Long, city: String)
+  case class Location(customerId : Long, city: String, ip: String)
+
 
   def main(args: Array[String]): Unit = {
 
@@ -26,17 +27,17 @@ object ECommerceCEP {
     import streamSqlContext._
 
     // create DStream of transactions
-    val transactionRDD1 = sc.parallelize(1 to 100).map(i => Transaction(randomCustomerId(), randomCity(), randomAmount()))
+    val transactionRDD1 = sc.parallelize(1 to 100).map(i => Transaction(randomCustomerId(), randomCity(), randomAmount(), randomIP()))
     val transactionStream1 = new ConstantInputDStream[Transaction](ssc, transactionRDD1)
     registerDStreamAsTable(transactionStream1, "transactions")
 
     // create DStream of clicks
-    val clickRDD1 = sc.parallelize(1 to 100).map(i => Click(randomCustomerId(), randomCity(), randomProductId()))
+    val clickRDD1 = sc.parallelize(1 to 100).map(i => Click(randomCustomerId(), randomCity(), randomProductId(), randomIP()))
     val clickStream1 = new ConstantInputDStream[Click](ssc, clickRDD1)
     registerDStreamAsTable(clickStream1, "clicks")
 
     // create DStream of customer locations
-    val locationRDD1 = sc.parallelize(1 to 100).map(i => Location(randomCustomerId(), randomCity()))
+    val locationRDD1 = sc.parallelize(1 to 100).map(i => Location(randomCustomerId(), randomCity(), randomIP()))
     val locationStream1 = new ConstantInputDStream[Location](ssc, locationRDD1)
     registerDStreamAsTable(locationStream1, "locations")
 
@@ -104,5 +105,15 @@ object ECommerceCEP {
 
     v
   }
+
+
+  // generate random ip
+  def randomIP() : String = {
+    var v = (Math.random() * 100).toString
+
+    v
+
+  }
+
 }
 
