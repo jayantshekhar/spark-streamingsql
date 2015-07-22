@@ -12,7 +12,7 @@ object ECommerceCEP {
 
   case class Transaction(customerId : Long, city: String, amount: Double)
 
-  case class Click(customerId : Long, city: String)
+  case class Click(customerId : Long, city: String, productId : Long)
 
   case class Location(customerId : Long, city: String)
 
@@ -31,7 +31,7 @@ object ECommerceCEP {
     registerDStreamAsTable(transactionStream1, "transactions")
 
     // create DStream of clicks
-    val clickRDD1 = sc.parallelize(1 to 100).map(i => Click(randomCustomerId(), randomCity()))
+    val clickRDD1 = sc.parallelize(1 to 100).map(i => Click(randomCustomerId(), randomCity(), randomProductId()))
     val clickStream1 = new ConstantInputDStream[Click](ssc, clickRDD1)
     registerDStreamAsTable(clickStream1, "clicks")
 
@@ -91,8 +91,15 @@ object ECommerceCEP {
     v
   }
 
-  // generate random price
+  // generate random customer id
   def randomCustomerId() : Int = {
+    var v = (Math.random() * 100).toInt
+
+    v
+  }
+
+  // generate random product id
+  def randomProductId() : Int = {
     var v = (Math.random() * 100).toInt
 
     v
