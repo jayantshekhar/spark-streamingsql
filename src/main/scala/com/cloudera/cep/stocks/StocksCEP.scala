@@ -40,15 +40,16 @@ object StocksCEP {
   def runQueries(streamSqlContext : StreamSQLContext): Unit = {
 
     // display all the stock ticks
-    //streamSqlContext.sql("SELECT * FROM stocks").map(_.copy()).print()
+    streamSqlContext.sql("SELECT * FROM stocks").map(_.copy()).print()
 
     // compute count/avg of ticks for each symbol
-    //streamSqlContext.sql("SELECT symbol, count(*), avg(price) FROM stocks group by symbol").map(_.copy()).print()
+    streamSqlContext.sql("SELECT symbol, count(*), avg(price) FROM stocks group by symbol").map(_.copy()).print()
 
-    // display symbols for which there is rapid drop-off : change > 96
+    // display symbols for which there is rapid drop-off in the duration : change > 96
     streamSqlContext.sql("SELECT symbol, avg(price), (max(price) - min(price)) as chg FROM stocks group by symbol having chg > 6.0").map(_.copy()).print()
 
-    // compute moving average for each symbol
+    // compute the avg stock price over a window of 60 seconds sliding every 20 seconds
+    streamSqlContext.sql("SELECT symbol, avg(price) FROM stocks OVER (WINDOW '60' SECONDS, SLIDE '20' SECONDS) group by symbol ").map(_.copy()).print()
 
   }
 
