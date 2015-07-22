@@ -62,6 +62,9 @@ object ECommerceCEP {
     // find customers with the highest total transaction amounts
     streamSqlContext.sql("SELECT customerId, sum(amount) as total FROM transactions group by customerId order by total desc limit 3").map(_.copy()).print()
 
+    // find customers with the highest number of transactions
+    streamSqlContext.sql("SELECT customerId, count(*) as num FROM transactions group by customerId order by num desc limit 3").map(_.copy()).print()
+
     // find customers who had records from 2 different cities in the duration
     streamSqlContext.sql(
       "SELECT transactions.customerId, count(*) as c FROM transactions JOIN clicks on transactions.customerId = clicks.customerId group by transactions.customerId, transactions.city having c > 1").map(_.copy()).print()
