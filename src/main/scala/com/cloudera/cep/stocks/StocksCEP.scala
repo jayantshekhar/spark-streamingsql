@@ -11,11 +11,9 @@ import org.apache.spark.streaming.dstream.ConstantInputDStream
  */
 object StocksCEP {
 
-  case class User(id: Int, name: String)
+  case class Stock(symbol: String, price: Double)
 
   def main(args: Array[String]): Unit = {
-    // val ssc = new StreamingContext("local[10]", "test", Duration(3000))
-    // val sc = ssc.sparkContext
 
     val ssc = SparkConfUtil.createSparkContext(20000, "StocksCEP")
     val sc = ssc.sparkContext
@@ -23,18 +21,34 @@ object StocksCEP {
     val streamSqlContext = new StreamSQLContext(ssc, new SQLContext(sc))
     import streamSqlContext._
 
-    val userRDD1 = sc.parallelize(1 to 100).map(i => User(i / 2, s"$i"))
-    val userStream1 = new ConstantInputDStream[User](ssc, userRDD1)
-    registerDStreamAsTable(userStream1, "user1")
+    val stockRDD1 = sc.parallelize(1 to 100).map(i => Stock(randomSymbol(), randomPrice()))
+    val stockStream1 = new ConstantInputDStream[Stock](ssc, stockRDD1)
+    registerDStreamAsTable(stockStream1, "stocks")
 
-    val userRDD2 = sc.parallelize(1 to 100).map(i => User(i / 5, s"$i"))
-    val userStream2 = new ConstantInputDStream[User](ssc, userRDD2)
-    registerDStreamAsTable(userStream2, "user2")
-
-    sql("SELECT * FROM user1 JOIN user2 ON user1.id = user2.id").map(_.copy()).print()
+    sql("SELECT * FROM stocks").map(_.copy()).print()
 
     ssc.start()
     ssc.awaitTerminationOrTimeout(30 * 1000)
     ssc.stop()
+  }
+
+  //
+  def randomSymbol() : String = {
+    var idx = (Math.random() * 100).toInt
+
+    var symbols = Array("GOOG", "FB", "AAPL")
+
+    var length = symbols.length
+
+    idx = idx % length
+
+    symbols(idx)
+
+  }
+
+  def randomPrice() : Double = {
+    var v = Math.random() * 100
+
+    v
   }
 }
