@@ -30,7 +30,6 @@ object StocksCEP {
     // run queries
     runQueries(streamSqlContext)
 
-
     // start/stop
     ssc.start()
     ssc.awaitTerminationOrTimeout(300 * 1000)
@@ -43,11 +42,14 @@ object StocksCEP {
     // display all the stock ticks
     //streamSqlContext.sql("SELECT * FROM stocks").map(_.copy()).print()
 
-    // display count/avg of ticks for each symbol
+    // compute count/avg of ticks for each symbol
     //streamSqlContext.sql("SELECT symbol, count(*), avg(price) FROM stocks group by symbol").map(_.copy()).print()
 
     // display symbols for which there is rapid drop-off : change > 96
-    streamSqlContext.sql("SELECT symbol, avg(price), (max(price) - min(price)) as chg FROM stocks group by symbol having chg > 96.0").map(_.copy()).print()
+    streamSqlContext.sql("SELECT symbol, avg(price), (max(price) - min(price)) as chg FROM stocks group by symbol having chg > 6.0").map(_.copy()).print()
+
+    // compute moving average for each symbol
+
   }
 
   // generate random symbol
