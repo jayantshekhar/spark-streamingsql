@@ -1,8 +1,9 @@
-package com.cloudera.cep.stocks
+package com.cloudera.cep.ecommerce
 
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.streaming.StreamSQLContext
 import org.apache.spark.sql.streaming.examples.SparkConfUtil
+import org.apache.spark.sql.streaming.examples.StreamToStreamJoin.User
 import org.apache.spark.streaming.dstream.ConstantInputDStream
 
 /**
@@ -52,6 +53,12 @@ object ECommerceCEP {
 
   // run the queries
   def runQueries(streamSqlContext : StreamSQLContext): Unit = {
+
+    // ---
+    val dstream = streamSqlContext.sql("SELECT * FROM transactions")
+    dstream.map(row => ECommerceListener.listen(row))
+
+    // ---
 
     streamSqlContext.sql("SELECT * FROM transactions").map(_.copy()).print()
 

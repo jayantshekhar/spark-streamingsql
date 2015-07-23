@@ -1,9 +1,11 @@
 package com.cloudera.cep.stocks
 
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.streaming.examples.StreamToTableJoin.User
+import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.sql.streaming.StreamSQLContext
 import org.apache.spark.sql.streaming.examples.SparkConfUtil
-import org.apache.spark.sql.streaming.examples.StreamToStreamJoin.User
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.streaming.dstream.ConstantInputDStream
 
 /**
@@ -13,11 +15,16 @@ object StocksCEP {
 
   case class Stock(symbol: String, price: Double)
 
+  case class StockDetail(symbol : String, d : String)
+
+  case class Person(name: String, age: Int)
+
   def main(args: Array[String]): Unit = {
 
     // create StreamSQLContext
     val ssc = SparkConfUtil.createSparkContext(20000, "StocksCEP")
     val sc = ssc.sparkContext
+    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 
     val streamSqlContext = new StreamSQLContext(ssc, new SQLContext(sc))
     import streamSqlContext._
@@ -26,6 +33,11 @@ object StocksCEP {
     val stockRDD1 = sc.parallelize(1 to 100).map(i => Stock(randomSymbol(), randomPrice()))
     val stockStream1 = new ConstantInputDStream[Stock](ssc, stockRDD1)
     registerDStreamAsTable(stockStream1, "stocks")
+
+    // create dataframe of stock details
+    val rdd : RDD[StockDetail] = sc.parallelize(stockDetails())
+    val df = streamSqlContext.sqlContext.createDataFrame(rdd)
+    df.registerTempTable("stockdetails")
 
     // run queries
     runQueries(streamSqlContext)
@@ -51,6 +63,12 @@ object StocksCEP {
     // compute the avg stock price over a window of 60 seconds sliding every 20 seconds
     streamSqlContext.sql("SELECT symbol, avg(price) FROM stocks OVER (WINDOW '60' SECONDS, SLIDE '20' SECONDS) group by symbol ").map(_.copy()).print()
 
+    val joinedds = streamSqlContext.sql(
+      "SELECT * FROM stocks s, stockdetails sd where s.symbol = sd.symbol")
+
+    joinedds.map(_.copy()).print()
+
+    print("aaaaa")
   }
 
   // generate random symbol
@@ -73,4 +91,28 @@ object StocksCEP {
 
     v
   }
+
+
+  def stockDetails() : Array[StockDetail] = {
+    var arr : Array[StockDetail] = new Array[StockDetail](3)
+
+    arr(0) = StockDetail("GOOG", "Google")
+    arr(1) = StockDetail("FB", "Facebook")
+    arr(2) = StockDetail("AAPL", "Apple")
+
+    arr
+  }
+
+
+  /*
+  def stockDetails() : Array[String] = {
+    var arr : Array[String] = new Array[String](3)
+
+    arr(0) = "GOOG,Google"
+    arr(1) = "FB,Facebook"
+    arr(2) = "AAPL,Apple"
+
+    arr
+  }
+  */
 }
