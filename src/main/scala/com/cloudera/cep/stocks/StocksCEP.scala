@@ -29,17 +29,17 @@ object StocksCEP {
     val streamSqlContext = new StreamSQLContext(ssc, new SQLContext(sc))
     import streamSqlContext._
 
-    // create DStream of stocks
+    // create DStream of stocks and register it as a table
     val stockRDD1 = sc.parallelize(1 to 100).map(i => Stock(randomSymbol(), randomPrice()))
     val stockStream1 = new ConstantInputDStream[Stock](ssc, stockRDD1)
     registerDStreamAsTable(stockStream1, "stocks")
 
-    // create dataframe of stock details
+    // create dataframe of stock details and register it as a table
     val rdd : RDD[StockDetail] = sc.parallelize(stockDetails())
     val df = streamSqlContext.sqlContext.createDataFrame(rdd)
     df.registerTempTable("stockdetails")
 
-    // run queries
+    // run queries on the tables created
     runQueries(streamSqlContext)
 
     // start/stop
@@ -102,17 +102,5 @@ object StocksCEP {
 
     arr
   }
-
-
-  /*
-  def stockDetails() : Array[String] = {
-    var arr : Array[String] = new Array[String](3)
-
-    arr(0) = "GOOG,Google"
-    arr(1) = "FB,Facebook"
-    arr(2) = "AAPL,Apple"
-
-    arr
-  }
-  */
+  
 }
