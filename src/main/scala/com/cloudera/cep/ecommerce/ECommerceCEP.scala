@@ -54,11 +54,8 @@ object ECommerceCEP {
   // run the queries
   def runQueries(streamSqlContext : StreamSQLContext): Unit = {
 
-    // ---
     val dstream = streamSqlContext.sql("SELECT * FROM transactions")
     dstream.map(row => ECommerceListener.listen(row))
-
-    // ---
 
     streamSqlContext.sql("SELECT * FROM transactions").map(_.copy()).print()
 
@@ -75,7 +72,8 @@ object ECommerceCEP {
 
     // find customers who had records from 2 different cities in the duration
     streamSqlContext.sql(
-      "SELECT transactions.customerId, count(*) as c FROM transactions JOIN clicks on transactions.customerId = clicks.customerId group by transactions.customerId, transactions.city having c > 1").map(_.copy()).print()
+      "SELECT transactions.customerId, count(*) as c FROM transactions JOIN clicks on transactions.customerId = clicks.customerId group by " +
+        "transactions.customerId, transactions.city having c > 1").map(_.copy()).print()
   }
 
   // generate random city

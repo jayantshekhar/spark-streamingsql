@@ -1,11 +1,9 @@
 package com.cloudera.cep.stocks
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.streaming.examples.StreamToTableJoin.User
-import org.apache.spark.sql.{Row, SQLContext}
+import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.streaming.StreamSQLContext
 import org.apache.spark.sql.streaming.examples.SparkConfUtil
-import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.streaming.dstream.ConstantInputDStream
 
 /**
@@ -16,8 +14,6 @@ object StocksCEP {
   case class Stock(symbol: String, price: Double)
 
   case class StockDetail(symbol : String, d : String)
-
-  case class Person(name: String, age: Int)
 
   def main(args: Array[String]): Unit = {
 
@@ -68,7 +64,6 @@ object StocksCEP {
 
     joinedds.map(_.copy()).print()
 
-    print("aaaaa")
   }
 
   // generate random symbol
@@ -102,5 +97,5 @@ object StocksCEP {
 
     arr
   }
-  
+
 }
