@@ -59,6 +59,7 @@ object StocksCEP {
     // compute the avg stock price over a window of 60 seconds sliding every 20 seconds
     streamSqlContext.sql("SELECT symbol, avg(price) FROM stocks OVER (WINDOW '60' SECONDS, SLIDE '20' SECONDS) group by symbol ").map(_.copy()).print()
 
+    // join stock stream with stock details (dataframe)
     val joinedds = streamSqlContext.sql(
       "SELECT * FROM stocks s, stockdetails sd where s.symbol = sd.symbol")
 
